@@ -1,25 +1,57 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
-import businesses from '@/data/businesses';
 import { filterBusinesses, sortBusinesses } from '@/utils/filteringLogic';
+import API_BASE_URL from '@/utils/api';
 import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import ShopGrid from '@/components/ShopGrid';
+import { FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 
 export default function DirectoryPage() {
   const { theme } = useTheme();
+  const [businesses, setBusinesses] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sortBy, setSortBy] = useState('rating');
 
+  // ── Fetch businesses from backend ─────────────────────────
+  const fetchBusinesses = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/businesses`);
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log(`[Directory] Fetched ${data.length} businesses from API`);
+      setBusinesses(data);
+    } catch (err) {
+      console.error('[Directory] API fetch failed:', err.message);
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBusinesses();
+  }, [fetchBusinesses]);
+
+  // ── Filter & sort ──────────────────────────────────────────
   const filteredBusinesses = useMemo(() => {
     let filtered = filterBusinesses(businesses, searchQuery, selectedCategory);
     filtered = sortBusinesses(filtered, sortBy, 'desc');
     return filtered;
-  }, [searchQuery, selectedCategory, sortBy]);
+  }, [businesses, searchQuery, selectedCategory, sortBy]);
 
   const handleSearch = useCallback((query) => {
     setSearchQuery(query);
@@ -62,18 +94,15 @@ export default function DirectoryPage() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="space-y-6 mb-12"
         >
-          {/* Search Bar */}
           <SearchBar onSearch={handleSearch} placeholder="Search by name, category, or service..." />
-
-          {/* Category Filter */}
           <CategoryFilter onCategoryChange={handleCategoryChange} selectedCategory={selectedCategory} />
 
           {/* Sort Options */}
           <div className="flex gap-3 flex-wrap">
             {[
-              { value: 'rating', label: '⭐ Top Rated' },
+              { value: 'rating',  label: '⭐ Top Rated' },
               { value: 'reviews', label: '💬 Most Reviewed' },
-              { value: 'name', label: '🔤 Name (A-Z)' },
+              { value: 'name',    label: '🔤 Name (A-Z)' },
             ].map((option) => (
               <button
                 key={option.value}
@@ -92,11 +121,44 @@ export default function DirectoryPage() {
           </div>
         </motion.div>
 
+        {/* Error State */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className={`mb-8 p-6 rounded-2xl text-center ${
+              theme === 'dark'
+                ? 'bg-red-900/20 border border-red-500/30'
+                : 'bg-red-50 border border-red-200'
+            }`}
+          >
+            <FiAlertCircle className="w-10 h-10 mx-auto mb-3 text-red-500" />
+            <h3 className={`text-lg font-semibold mb-1 ${
+              theme === 'dark' ? 'text-red-300' : 'text-red-800'
+            }`}>
+              Could not load businesses
+            </h3>
+            <p className={`text-sm mb-4 ${
+              theme === 'dark' ? 'text-red-400' : 'text-red-600'
+            }`}>
+              {error}
+            </p>
+            <button
+              onClick={fetchBusinesses}
+              className="inline-flex items-center gap-2 px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-full text-sm font-medium transition-colors"
+            >
+              <FiRefreshCw className="w-4 h-4" />
+              Retry
+            </button>
+          </motion.div>
+        )}
+
         {/* Shop Grid */}
         <ShopGrid
           businesses={filteredBusinesses}
           searchQuery={searchQuery}
           categoryFilter={selectedCategory}
+          isLoading={isLoading}
         />
       </div>
     </main>

@@ -22,7 +22,7 @@ const rawBusinesses = [
     },
     tagline: 'Freshly Baked Happiness',
     description: 'Premium handcrafted cakes and pastries made with love and quality ingredients.',
-    image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=500',
+    image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600',
     rating: 4.8,
     reviews: 156,
     services: [
@@ -124,7 +124,7 @@ const rawBusinesses = [
     },
     tagline: 'Your Health, Our Priority',
     description: '24/7 Medical Center with experienced doctors and modern equipment.',
-    image: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=500',
+    image: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=600',
     rating: 4.9,
     reviews: 234,
     services: [
@@ -226,7 +226,7 @@ const rawBusinesses = [
     },
     tagline: 'Beauty Redefined',
     description: 'Premium beauty salon with certified professionals and latest trends.',
-    image: 'https://images.unsplash.com/photo-1633414743161-e27e6a6efc14?w=500',
+    image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600',
     rating: 4.8,
     reviews: 189,
     services: [
@@ -327,7 +327,7 @@ const rawBusinesses = [
     },
     tagline: 'Fresh Produce Daily',
     description: 'Your one-stop shop for fresh groceries, vegetables, and daily essentials.',
-    image: 'https://images.unsplash.com/photo-1552707052-481f06228fce?w=500',
+    image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=600',
     rating: 4.6,
     reviews: 221,
     services: [
@@ -429,7 +429,7 @@ const rawBusinesses = [
     },
     tagline: 'Excellence in Education',
     description: 'Professional coaching center for competitive exams and academics.',
-    image: 'https://images.unsplash.com/photo-1427504494785-cdaf8faf00b7?w=500',
+    image: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=600',
     rating: 4.9,
     reviews: 198,
     services: [

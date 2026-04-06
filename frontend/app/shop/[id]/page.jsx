@@ -1,21 +1,42 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { notFound } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { FiArrowLeft, FiPhone, FiMail, FiMapPin, FiClock } from 'react-icons/fi';
-import Image from 'next/image';
 import Link from 'next/link';
 import { getBusinessById, getRelatedBusinesses } from '@/data/businesses';
+import API_BASE_URL from '@/utils/api';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import WhatsAppButton from '@/components/WhatsAppButton';
 
+const CATEGORY_FALLBACKS = {
+  Bakery:   'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900',
+  Medical:  'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=900',
+  Salon:    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900',
+  Grocery:  'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900',
+  Coaching: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900',
+};
+const DEFAULT_PLACEHOLDER = 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=900';
+
 export default function ShopPage({ params }) {
   const { id } = params;
   const { theme } = useTheme();
-  const business = getBusinessById(id);
+
+  // Try local data first, then fetch from API
+  const localBusiness = getBusinessById(id);
+  const [business, setBusiness] = useState(localBusiness);
   const relatedBusinesses = getRelatedBusinesses(id, 3);
+
+  useEffect(() => {
+    // Also try API for latest data (with imageUrl)
+    fetch(`${API_BASE_URL}/api/businesses/${id}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => { if (data) setBusiness(data); })
+      .catch(() => {}); // silently fall back to local data
+  }, [id]);
 
   if (!business) {
     notFound();
@@ -76,16 +97,19 @@ export default function ShopPage({ params }) {
               variants={itemVariants}
               className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
             >
-              {business.heroImage && (
-                <Image
-                  src={business.heroImage}
-                  alt={business.name}
-                  fill
-                  className="object-cover"
-                  priority
-                  unoptimized
-                />
-              )}
+              {(() => {
+                const heroSrc = business.imageUrl || business.heroImage || business.image;
+                const fallback = CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
+                const src = (heroSrc && heroSrc.startsWith('http')) ? heroSrc : fallback;
+                return (
+                  <img
+                    src={src}
+                    alt={business.name}
+                    onError={(e) => { e.target.src = fallback; }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                );
+              })()}
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
               {/* Overlay Content */}
@@ -176,12 +200,12 @@ export default function ShopPage({ params }) {
                       {/* Service Image */}
                       {service.image && (
                         <div className="relative w-full h-40 overflow-hidden bg-gray-200 dark:bg-gray-800">
-                          <Image
-                            src={service.image}
+                          <img
+                            src={service.image.startsWith('http') ? service.image : DEFAULT_PLACEHOLDER}
                             alt={service.title || service.name}
-                            fill
-                            className="object-cover hover:scale-110 transition-transform duration-300"
-                            unoptimized
+                            onError={(e) => { e.target.src = DEFAULT_PLACEHOLDER; }}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                            className="hover:scale-110 transition-transform duration-300"
                           />
                         </div>
                       )}
@@ -236,12 +260,12 @@ export default function ShopPage({ params }) {
                       whileHover={{ scale: 1.05 }}
                       className="relative h-48 rounded-lg overflow-hidden cursor-pointer"
                     >
-                      <Image
-                        src={image}
+                      <img
+                        src={image.startsWith('http') ? image : DEFAULT_PLACEHOLDER}
                         alt={`Gallery ${idx + 1}`}
-                        fill
-                        className="object-cover hover:scale-110 transition-transform duration-300"
-                        unoptimized
+                        onError={(e) => { e.target.src = DEFAULT_PLACEHOLDER; }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        className="hover:scale-110 transition-transform duration-300"
                       />
                     </motion.div>
                   ))}

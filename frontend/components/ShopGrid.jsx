@@ -12,12 +12,7 @@ export default function ShopGrid({ businesses, isLoading = false, searchQuery = 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className={`h-96 rounded-2xl animate-pulse ${
-              theme === 'dark' ? 'bg-purple-900/20' : 'bg-gray-200'
-            }`}
-          />
+          <ShopCard key={`skeleton-${i}`} business={null} index={i} />
         ))}
       </div>
     );

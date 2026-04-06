@@ -1,12 +1,23 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { FiClock, FiPhone, FiMapPin, FiMail } from 'react-icons/fi';
-import Image from 'next/image';
+
+const CATEGORY_FALLBACKS = {
+  Bakery:   'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=900',
+  Medical:  'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?w=900',
+  Salon:    'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=900',
+  Grocery:  'https://images.unsplash.com/photo-1542838132-92c53300491e?w=900',
+  Coaching: 'https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=900',
+};
+
+const DEFAULT_PLACEHOLDER = 'https://images.unsplash.com/photo-1556745757-8d76bdb6984b?w=900';
 
 export default function ShopDetail({ business }) {
   const { theme } = useTheme();
+  const [heroError, setHeroError] = useState(false);
 
   if (!business) {
     return (
@@ -17,6 +28,14 @@ export default function ShopDetail({ business }) {
       </div>
     );
   }
+
+  // Resolve hero image — same logic as ShopCard
+  const resolveHeroImage = () => {
+    if (heroError) return CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
+    if (business.imageUrl) return business.imageUrl;
+    if (business.image && business.image.startsWith('http')) return business.image;
+    return CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -40,12 +59,11 @@ export default function ShopDetail({ business }) {
     >
       {/* Hero Section */}
       <motion.div variants={itemVariants} className="relative h-96 rounded-2xl overflow-hidden">
-        <Image
-          src={business.image}
+        <img
+          src={resolveHeroImage()}
           alt={business.name}
-          fill
-          className="object-cover"
-          priority
+          onError={() => setHeroError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         
