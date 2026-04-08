@@ -12,14 +12,27 @@ export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  const [user, setUser] = useState(null);
+
   useEffect(() => {
     setMounted(true);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    window.location.href = '/login';
+  };
 
   const navItems = [
     { label: 'Home', href: '/' },
@@ -74,26 +87,44 @@ export default function Navbar() {
 
           {/* Right Actions */}
           <div className="flex items-center space-x-3">
-            {/* Login/Signup Buttons */}
+            {/* Login/Signup Buttons or Profile */}
             <div className="hidden md:flex items-center space-x-2">
-              <Link href="/login">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-purple-500 transition-all"
-                >
-                  Login
-                </motion.button>
-              </Link>
-              <Link href="/signup">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg transition-all"
-                >
-                  Sign Up
-                </motion.button>
-              </Link>
+              {user ? (
+                <div className="flex items-center gap-4">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 uppercase">
+                    Hi, {user.name.split(' ')[0]}
+                  </span>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-lg text-red-500 border border-red-500/30 hover:bg-red-50 transition-all"
+                  >
+                    Logout
+                  </motion.button>
+                </div>
+              ) : (
+                <>
+                  <Link href="/login">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-2 rounded-lg text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:border-purple-500 transition-all"
+                    >
+                      Login
+                    </motion.button>
+                  </Link>
+                  <Link href="/signup">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 text-white hover:shadow-lg transition-all"
+                    >
+                      Sign Up
+                    </motion.button>
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Theme Toggle */}

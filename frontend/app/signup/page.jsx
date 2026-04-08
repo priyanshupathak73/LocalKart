@@ -29,24 +29,46 @@ export default function SignupPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-        setMessage('❌ Please fill in all fields');
-      } else if (formData.password !== formData.confirmPassword) {
-        setMessage('❌ Passwords do not match');
-      } else if (formData.password.length < 6) {
-        setMessage('❌ Password must be at least 6 characters');
-      } else {
-        setMessage('✓ Account created successfully! (Frontend demo)');
-        setFormData({ name: '', email: '', password: '', confirmPassword: '' });
-      }
+    setMessage('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setMessage('❌ Passwords do not match');
       setLoading(false);
-    }, 1000);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage('✓ Account created! Redirecting to login...');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+      } else {
+        setMessage(`❌ ${data.message || 'Signup failed'}`);
+      }
+    } catch (error) {
+      setMessage('❌ Connection error. Is the server running?');
+      console.error('Signup error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const containerVariants = {

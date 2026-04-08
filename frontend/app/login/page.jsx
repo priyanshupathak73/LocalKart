@@ -26,20 +26,41 @@ export default function LoginPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      if (formData.email && formData.password) {
-        setMessage('✓ Login successful! (Frontend demo)');
-        setFormData({ email: '', password: '' });
+    setMessage('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setMessage('✓ Login successful! Redirecting...');
+        // Store token in localStorage
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        // Redirect to home page
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       } else {
-        setMessage('❌ Please fill in all fields');
+        setMessage(`❌ ${data.message || 'Login failed'}`);
       }
+    } catch (error) {
+      setMessage('❌ Connection error. Is the server running?');
+      console.error('Login error:', error);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const containerVariants = {
