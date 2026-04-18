@@ -7,7 +7,27 @@ const User = require('../models/User');
 // @route   POST /api/auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      shopName,
+      shopCategory,
+      address,
+      phoneNumber,
+    } = req.body;
+
+    const normalizedRole = role === 'shopkeeper' ? 'shopkeeper' : 'customer';
+
+    if (normalizedRole === 'shopkeeper') {
+      if (!shopName || !shopCategory || !address || !phoneNumber) {
+        return res.status(400).json({
+          success: false,
+          message: 'Shopkeeper signup requires shop name, category, address and phone number',
+        });
+      }
+    }
 
     // Check if user exists
     const userExists = await User.findOne({ email });
@@ -20,6 +40,11 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password,
+      role: normalizedRole,
+      shopName: normalizedRole === 'shopkeeper' ? shopName : undefined,
+      shopCategory: normalizedRole === 'shopkeeper' ? shopCategory : undefined,
+      address: normalizedRole === 'shopkeeper' ? address : undefined,
+      phoneNumber: normalizedRole === 'shopkeeper' ? phoneNumber : undefined,
     });
 
     // Create token
@@ -34,6 +59,11 @@ router.post('/register', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        shopName: user.shopName,
+        shopCategory: user.shopCategory,
+        address: user.address,
+        phoneNumber: user.phoneNumber,
       },
     });
   } catch (error) {
@@ -73,6 +103,11 @@ router.post('/login', async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
+        shopName: user.shopName,
+        shopCategory: user.shopCategory,
+        address: user.address,
+        phoneNumber: user.phoneNumber,
       },
     });
   } catch (error) {

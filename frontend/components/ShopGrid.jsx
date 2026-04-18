@@ -1,12 +1,25 @@
 'use client';
 
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import ShopCard from './ShopCard';
 import { FiSearch } from 'react-icons/fi';
 
-export default function ShopGrid({ businesses, isLoading = false, searchQuery = '', categoryFilter = 'All' }) {
+export default function ShopGrid({ businesses, totalBusinesses = 0, isLoading = false, searchQuery = '', categoryFilter = 'All' }) {
   const { theme } = useTheme();
+
+  useEffect(() => {
+    console.log('[ShopGrid] Final rendered list:', {
+      totalBusinesses,
+      renderedCount: businesses.length,
+      renderedIds: businesses.map((business) => business.id),
+    });
+
+    businesses.forEach((business) => {
+      console.log(business.name, business.imageUrl || business.thumbnail || business.image || null);
+    });
+  }, [businesses, totalBusinesses]);
 
   if (isLoading) {
     return (
@@ -19,6 +32,8 @@ export default function ShopGrid({ businesses, isLoading = false, searchQuery = 
   }
 
   if (businesses.length === 0) {
+    const noDataAtSource = totalBusinesses === 0;
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -33,12 +48,14 @@ export default function ShopGrid({ businesses, isLoading = false, searchQuery = 
         <h3 className={`text-xl font-bold mb-2 ${
           theme === 'dark' ? 'text-gray-200' : 'text-gray-800'
         }`}>
-          No businesses found
+          {noDataAtSource ? 'No businesses found' : 'No matching businesses'}
         </h3>
         <p className={`text-sm ${
           theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
         }`}>
-          {searchQuery
+          {noDataAtSource
+            ? 'Business data is currently unavailable.'
+            : searchQuery
             ? `No results for "${searchQuery}" in ${categoryFilter === 'All' ? 'all categories' : categoryFilter}`
             : 'Try adjusting your filters'}
         </p>

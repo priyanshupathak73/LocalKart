@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
@@ -36,6 +36,10 @@ export default function ShopCard({ business, index = 0 }) {
     );
   }
 
+  useEffect(() => {
+    console.log(business.name, business.imageUrl || business.thumbnail || business.image || null);
+  }, [business]);
+
   // ── Resolve image URL ─────────────────────────────────────
   // Priority: backend's imageUrl → business.image (if valid URL) → category fallback → default
   const resolveImageSrc = () => {
@@ -43,8 +47,11 @@ export default function ShopCard({ business, index = 0 }) {
       return CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
     }
 
-    // Backend now sends `imageUrl` which is always a full, valid URL
+    // Primary field from API
     if (business.imageUrl) return business.imageUrl;
+
+    // Secondary image field
+    if (business.thumbnail) return business.thumbnail;
 
     // Fallback: check if `image` field is a valid external URL
     if (business.image && (business.image.startsWith('http://') || business.image.startsWith('https://'))) {

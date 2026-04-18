@@ -1,5 +1,5 @@
 // Filter and Search Logic
-import { getBusinessesByCategory, searchBusinesses } from '../data/businesses';
+const toLower = (value) => String(value ?? '').toLowerCase();
 
 /**
  * Advanced filtering function combining category and search
@@ -9,28 +9,36 @@ import { getBusinessesByCategory, searchBusinesses } from '../data/businesses';
  * @returns {Array} Filtered businesses array
  */
 export const filterBusinesses = (businesses, searchQuery = '', selectedCategory = 'All') => {
-  let filtered = businesses;
+  let filtered = Array.isArray(businesses) ? businesses : [];
+  const normalizedCategory = String(selectedCategory ?? 'All').trim().toLowerCase();
+  const normalizedQuery = String(searchQuery ?? '').trim().toLowerCase();
 
   // Apply category filter
-  if (selectedCategory && selectedCategory !== 'All') {
-    filtered = filtered.filter(business => business.category === selectedCategory);
+  if (normalizedCategory && normalizedCategory !== 'all') {
+    filtered = filtered.filter((business) => {
+      const businessCategory = toLower(business.category || business.type);
+      return businessCategory === normalizedCategory;
+    });
   }
 
   // Apply search filter
-  if (searchQuery.trim()) {
-    const lowercaseQuery = searchQuery.toLowerCase();
+  if (normalizedQuery) {
     filtered = filtered.filter(
-      business =>
-        business.name.toLowerCase().includes(lowercaseQuery) ||
-        business.category.toLowerCase().includes(lowercaseQuery) ||
-        business.description.toLowerCase().includes(lowercaseQuery) ||
-        business.tagline.toLowerCase().includes(lowercaseQuery) ||
-        business.address.toLowerCase().includes(lowercaseQuery) ||
-        business.services.some(
-          service =>
-            service.name.toLowerCase().includes(lowercaseQuery) ||
-            service.description.toLowerCase().includes(lowercaseQuery)
-        )
+      (business) => {
+        const services = Array.isArray(business.services) ? business.services : [];
+
+        return (
+          toLower(business.name).includes(normalizedQuery) ||
+          toLower(business.category || business.type).includes(normalizedQuery) ||
+          toLower(business.description).includes(normalizedQuery) ||
+          toLower(business.tagline).includes(normalizedQuery) ||
+          toLower(business.address).includes(normalizedQuery) ||
+          services.some((service) =>
+            toLower(service.name || service.title).includes(normalizedQuery) ||
+            toLower(service.description).includes(normalizedQuery)
+          )
+        );
+      }
     );
   }
 

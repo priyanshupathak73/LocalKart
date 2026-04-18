@@ -1,0 +1,4 @@
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM=LocalKart <no-reply@yourdomain.com>
+FRONTEND_URL=http://localhost:3000
+APP_NAME=LocalKart

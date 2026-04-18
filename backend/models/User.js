@@ -23,8 +23,36 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
+    enum: ['customer', 'shopkeeper', 'admin', 'user'],
+    default: 'customer'
+  },
+  shopName: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'shopkeeper';
+    }
+  },
+  shopCategory: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'shopkeeper';
+    }
+  },
+  address: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'shopkeeper';
+    }
+  },
+  phoneNumber: {
+    type: String,
+    trim: true,
+    required: function() {
+      return this.role === 'shopkeeper';
+    }
   },
   createdAt: {
     type: Date,

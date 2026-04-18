@@ -10,6 +10,35 @@ const mongoose  = require('mongoose');
 const connectDB = require('./config/db');
 const Business  = require('./models/Business');
 
+const buildDynamicCategoryImage = (category = 'business', businessId = '', width = 600, height = 400) => {
+  const safeCategory = encodeURIComponent(String(category || 'business').toLowerCase());
+  const safeId = encodeURIComponent(String(businessId || 'biz'));
+  return `https://source.unsplash.com/${width}x${height}/?${safeCategory}&sig=${safeId}`;
+};
+
+const ensureUniqueSeedImages = (businesses = []) => {
+  const seen = new Set();
+
+  return businesses.map((business) => {
+    let image = typeof business.image === 'string' ? business.image.trim() : '';
+
+    if (!image) {
+      image = buildDynamicCategoryImage(business.category, business.id);
+    }
+
+    if (seen.has(image)) {
+      image = buildDynamicCategoryImage(business.category, business.id);
+    }
+
+    seen.add(image);
+
+    return {
+      ...business,
+      image,
+    };
+  });
+};
+
 // ── Seed Data ────────────────────────────────────────────────
 // Every image is now a working Unsplash URL — no more broken /images/*.png paths
 
@@ -294,9 +323,10 @@ const seedDB = async () => {
   await Business.deleteMany({});
 
   console.log('🌱 Seeding businesses...');
-  await Business.insertMany(seedData);
+  const normalizedSeedData = ensureUniqueSeedImages(seedData);
+  await Business.insertMany(normalizedSeedData);
 
-  console.log(`✅ Seeded ${seedData.length} businesses successfully!`);
+  console.log(`✅ Seeded ${normalizedSeedData.length} businesses successfully!`);
   process.exit(0);
 };
 

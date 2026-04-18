@@ -5,14 +5,19 @@ import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { getCategories, getCategoryIcon } from '../data/businesses';
 
-export default function CategoryFilter({ onCategoryChange, selectedCategory = 'All' }) {
+export default function CategoryFilter({ onCategoryChange, selectedCategory = 'All', businesses = [] }) {
   const [categories, setCategories] = useState(['All']);
   const { theme } = useTheme();
 
   useEffect(() => {
-    const cats = getCategories();
+    const dynamicCategories = [...new Set((businesses || [])
+      .map((business) => business.category || business.type)
+      .filter(Boolean))]
+      .sort((a, b) => a.localeCompare(b));
+
+    const cats = dynamicCategories.length > 0 ? dynamicCategories : getCategories();
     setCategories(['All', ...cats]);
-  }, []);
+  }, [businesses]);
 
   return (
     <div className="w-full overflow-x-auto pb-2">

@@ -38,6 +38,11 @@ export default function ShopPage({ params }) {
       .catch(() => {}); // silently fall back to local data
   }, [id]);
 
+  useEffect(() => {
+    if (!business) return;
+    console.log(business.name, business.imageUrl || business.thumbnail || business.image || null);
+  }, [business]);
+
   if (!business) {
     notFound();
   }
@@ -98,7 +103,7 @@ export default function ShopPage({ params }) {
               className="relative h-96 rounded-2xl overflow-hidden shadow-2xl"
             >
               {(() => {
-                const heroSrc = business.imageUrl || business.heroImage || business.image;
+                const heroSrc = business.imageUrl || business.thumbnail || business.heroImage || business.image;
                 const fallback = CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
                 const src = (heroSrc && heroSrc.startsWith('http')) ? heroSrc : fallback;
                 return (

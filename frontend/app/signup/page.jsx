@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { FiMail, FiLock, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
+import AUTH_API_BASE_URL from '@/utils/authApi';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -14,10 +15,15 @@ export default function SignupPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
+    role: 'customer',
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
+    shopName: '',
+    shopCategory: '',
+    address: '',
+    phoneNumber: '',
   });
   const [message, setMessage] = useState('');
 
@@ -40,25 +46,42 @@ export default function SignupPage() {
       return;
     }
 
+    if (formData.role === 'shopkeeper') {
+      if (!formData.shopName || !formData.shopCategory || !formData.address || !formData.phoneNumber) {
+        setMessage('❌ Please fill all shopkeeper fields');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
-      const response = await fetch('http://localhost:5000/api/auth/register', {
+      const response = await fetch(`${AUTH_API_BASE_URL}/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          role: formData.role,
           name: formData.name,
           email: formData.email,
           password: formData.password,
+          shopName: formData.role === 'shopkeeper' ? formData.shopName : undefined,
+          shopCategory: formData.role === 'shopkeeper' ? formData.shopCategory : undefined,
+          address: formData.role === 'shopkeeper' ? formData.address : undefined,
+          phoneNumber: formData.role === 'shopkeeper' ? formData.phoneNumber : undefined,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        setMessage('✓ Account created! Redirecting to login...');
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        const redirectPath = data.user?.role === 'shopkeeper' ? '/dashboard' : '/';
+        setMessage('✓ Account created! Redirecting...');
         setTimeout(() => {
-          window.location.href = '/login';
+          window.location.href = redirectPath;
         }, 1500);
       } else {
         setMessage(`❌ ${data.message || 'Signup failed'}`);
@@ -133,13 +156,174 @@ export default function SignupPage() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-x-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Role Selection */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.05 }}
+              >
+                <label className={`block text-sm font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Select Role
+                </label>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { label: 'Customer', value: 'customer' },
+                    { label: 'Shopkeeper', value: 'shopkeeper' },
+                  ].map((option) => {
+                    const isActive = formData.role === option.value;
+
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            role: option.value,
+                          }))
+                        }
+                        className={`rounded-lg px-4 py-3 text-sm font-semibold transition-all border-2 ${
+                          isActive
+                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white border-transparent shadow-lg'
+                            : theme === 'dark'
+                            ? 'bg-gray-800/50 border-gray-700 text-gray-300 hover:border-purple-500'
+                            : 'bg-gray-50 border-gray-200 text-gray-700 hover:border-purple-300'
+                        }`}
+                        aria-pressed={isActive}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+
+              {/* Shopkeeper Fields */}
+              {formData.role === 'shopkeeper' && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="space-y-5"
+                >
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Shop Name
+                    </label>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
+                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
+                    }`}>
+                      <input
+                        type="text"
+                        name="shopName"
+                        value={formData.shopName}
+                        onChange={handleChange}
+                        placeholder="Priya Kirana Mart"
+                        className={`flex-1 bg-transparent outline-none ${
+                          theme === 'dark'
+                            ? 'text-white placeholder-gray-600'
+                            : 'text-gray-900 placeholder-gray-500'
+                        }`}
+                        required={formData.role === 'shopkeeper'}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Shop Category
+                    </label>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
+                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
+                    }`}>
+                      <input
+                        type="text"
+                        name="shopCategory"
+                        value={formData.shopCategory}
+                        onChange={handleChange}
+                        placeholder="Grocery"
+                        className={`flex-1 bg-transparent outline-none ${
+                          theme === 'dark'
+                            ? 'text-white placeholder-gray-600'
+                            : 'text-gray-900 placeholder-gray-500'
+                        }`}
+                        required={formData.role === 'shopkeeper'}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Address
+                    </label>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
+                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
+                    }`}>
+                      <input
+                        type="text"
+                        name="address"
+                        value={formData.address}
+                        onChange={handleChange}
+                        placeholder="Main Road, Ara, Bihar"
+                        className={`flex-1 bg-transparent outline-none ${
+                          theme === 'dark'
+                            ? 'text-white placeholder-gray-600'
+                            : 'text-gray-900 placeholder-gray-500'
+                        }`}
+                        required={formData.role === 'shopkeeper'}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Phone Number
+                    </label>
+                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
+                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
+                    }`}>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleChange}
+                        placeholder="+91 9876543210"
+                        className={`flex-1 bg-transparent outline-none ${
+                          theme === 'dark'
+                            ? 'text-white placeholder-gray-600'
+                            : 'text-gray-900 placeholder-gray-500'
+                        }`}
+                        required={formData.role === 'shopkeeper'}
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
               {/* Name Field */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.1 }}
-                className="mb-5"
               >
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -174,7 +358,6 @@ export default function SignupPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mb-5"
               >
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -209,7 +392,6 @@ export default function SignupPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mb-5"
               >
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
@@ -253,7 +435,6 @@ export default function SignupPage() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
-                className="mb-5"
               >
                 <label className={`block text-sm font-medium mb-2 ${
                   theme === 'dark' ? 'text-gray-300' : 'text-gray-700'

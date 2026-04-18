@@ -1,0 +1,22 @@
+name = "localkart-auth"
+main = "src/index.ts"
+compatibility_date = "2026-04-18"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "localkart_auth"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[[kv_namespaces]]
+binding = "OTP_KV"
+id = "REPLACE_WITH_OTP_KV_NAMESPACE_ID"
+
+[[kv_namespaces]]
+binding = "SESSION_KV"
+id = "REPLACE_WITH_SESSION_KV_NAMESPACE_ID"
+
+[vars]
+APP_NAME = "LocalKart"
+FRONTEND_URL = "http://localhost:3000"
+RESEND_FROM = "LocalKart <no-reply@yourdomain.com>"

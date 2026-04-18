@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { FiClock, FiPhone, FiMapPin, FiMail } from 'react-icons/fi';
@@ -29,10 +29,15 @@ export default function ShopDetail({ business }) {
     );
   }
 
+  useEffect(() => {
+    console.log(business.name, business.imageUrl || business.thumbnail || business.image || null);
+  }, [business]);
+
   // Resolve hero image — same logic as ShopCard
   const resolveHeroImage = () => {
     if (heroError) return CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
     if (business.imageUrl) return business.imageUrl;
+    if (business.thumbnail) return business.thumbnail;
     if (business.image && business.image.startsWith('http')) return business.image;
     return CATEGORY_FALLBACKS[business.category] || DEFAULT_PLACEHOLDER;
   };
