@@ -18,12 +18,9 @@ export default function SignupPage() {
     role: 'customer',
     name: '',
     email: '',
+    phoneNumber: '',
     password: '',
     confirmPassword: '',
-    shopName: '',
-    shopCategory: '',
-    address: '',
-    phoneNumber: '',
   });
   const [message, setMessage] = useState('');
 
@@ -46,14 +43,6 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.role === 'shopkeeper') {
-      if (!formData.shopName || !formData.shopCategory || !formData.address || !formData.phoneNumber) {
-        setMessage('❌ Please fill all shopkeeper fields');
-        setLoading(false);
-        return;
-      }
-    }
-
     try {
       const response = await fetch(`${AUTH_API_BASE_URL}/signup`, {
         method: 'POST',
@@ -64,11 +53,8 @@ export default function SignupPage() {
           role: formData.role,
           name: formData.name,
           email: formData.email,
+          phoneNumber: formData.phoneNumber,
           password: formData.password,
-          shopName: formData.role === 'shopkeeper' ? formData.shopName : undefined,
-          shopCategory: formData.role === 'shopkeeper' ? formData.shopCategory : undefined,
-          address: formData.role === 'shopkeeper' ? formData.address : undefined,
-          phoneNumber: formData.role === 'shopkeeper' ? formData.phoneNumber : undefined,
         }),
       });
 
@@ -78,7 +64,7 @@ export default function SignupPage() {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
-        const redirectPath = data.user?.role === 'shopkeeper' ? '/dashboard' : '/';
+        const redirectPath = data.user?.role === 'shopkeeper' ? '/create-shop' : '/';
         setMessage('✓ Account created! Redirecting...');
         setTimeout(() => {
           window.location.href = redirectPath;
@@ -88,7 +74,7 @@ export default function SignupPage() {
       }
     } catch (error) {
       setMessage('❌ Connection error. Is the server running?');
-      console.error('Signup error:', error);
+      console.error('Signup error', error);
     } finally {
       setLoading(false);
     }
@@ -202,121 +188,10 @@ export default function SignupPage() {
                 </div>
               </motion.div>
 
-              {/* Shopkeeper Fields */}
               {formData.role === 'shopkeeper' && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-5"
-                >
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Shop Name
-                    </label>
-                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                      theme === 'dark'
-                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                    }`}>
-                      <input
-                        type="text"
-                        name="shopName"
-                        value={formData.shopName}
-                        onChange={handleChange}
-                        placeholder="Priya Kirana Mart"
-                        className={`flex-1 bg-transparent outline-none ${
-                          theme === 'dark'
-                            ? 'text-white placeholder-gray-600'
-                            : 'text-gray-900 placeholder-gray-500'
-                        }`}
-                        required={formData.role === 'shopkeeper'}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Shop Category
-                    </label>
-                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                      theme === 'dark'
-                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                    }`}>
-                      <input
-                        type="text"
-                        name="shopCategory"
-                        value={formData.shopCategory}
-                        onChange={handleChange}
-                        placeholder="Grocery"
-                        className={`flex-1 bg-transparent outline-none ${
-                          theme === 'dark'
-                            ? 'text-white placeholder-gray-600'
-                            : 'text-gray-900 placeholder-gray-500'
-                        }`}
-                        required={formData.role === 'shopkeeper'}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Address
-                    </label>
-                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                      theme === 'dark'
-                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                    }`}>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        placeholder="Main Road, Ara, Bihar"
-                        className={`flex-1 bg-transparent outline-none ${
-                          theme === 'dark'
-                            ? 'text-white placeholder-gray-600'
-                            : 'text-gray-900 placeholder-gray-500'
-                        }`}
-                        required={formData.role === 'shopkeeper'}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Phone Number
-                    </label>
-                    <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                      theme === 'dark'
-                        ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                        : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                    }`}>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={formData.phoneNumber}
-                        onChange={handleChange}
-                        placeholder="+91 9876543210"
-                        className={`flex-1 bg-transparent outline-none ${
-                          theme === 'dark'
-                            ? 'text-white placeholder-gray-600'
-                            : 'text-gray-900 placeholder-gray-500'
-                        }`}
-                        required={formData.role === 'shopkeeper'}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
+                <p className={`rounded-lg px-4 py-3 text-sm ${theme === 'dark' ? 'bg-purple-900/30 text-purple-200' : 'bg-purple-100 text-purple-700'}`}>
+                  Shop details will be collected in the next onboarding step.
+                </p>
               )}
 
               {/* Name Field */}
@@ -378,6 +253,37 @@ export default function SignupPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="you@example.com"
+                    className={`flex-1 bg-transparent outline-none ${
+                      theme === 'dark'
+                        ? 'text-white placeholder-gray-600'
+                        : 'text-gray-900 placeholder-gray-500'
+                    }`}
+                  />
+                </div>
+              </motion.div>
+
+              {/* Phone Field */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.25 }}
+              >
+                <label className={`block text-sm font-medium mb-2 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  Phone Number <span className="text-xs text-gray-400">(optional, used for login)</span>
+                </label>
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
+                    : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
+                }`}>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    value={formData.phoneNumber}
+                    onChange={handleChange}
+                    placeholder="9876543210"
                     className={`flex-1 bg-transparent outline-none ${
                       theme === 'dark'
                         ? 'text-white placeholder-gray-600'
