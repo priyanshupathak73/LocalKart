@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { Suspense, useState, useCallback, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
 import { useSearchParams } from 'next/navigation';
@@ -12,7 +12,7 @@ import CategoryFilter from '@/components/CategoryFilter';
 import ShopGrid from '@/components/ShopGrid';
 import { FiAlertCircle, FiRefreshCw } from 'react-icons/fi';
 
-export default function DirectoryPage() {
+function DirectoryPageContent() {
   const { theme } = useTheme();
   const searchParams = useSearchParams();
   const categoryFromUrl = searchParams.get('category');
@@ -200,5 +200,19 @@ export default function DirectoryPage() {
         />
       </div>
     </main>
+  );
+}
+
+export default function DirectoryPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen pt-24 pb-20 flex items-center justify-center">
+          <p className="text-sm text-gray-500">Loading directory...</p>
+        </main>
+      }
+    >
+      <DirectoryPageContent />
+    </Suspense>
   );
 }
