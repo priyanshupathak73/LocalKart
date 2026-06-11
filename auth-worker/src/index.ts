@@ -8,7 +8,7 @@ export interface Env {
   APP_NAME?: string;
 }
 
-type Role = 'customer' | 'shopkeeper';
+type Role = 'customer' | 'shopkeeper' | 'delivery';
 
 type UserRow = {
   id: string;
@@ -63,7 +63,7 @@ const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 
 const isValidPhone = (phone: string) => /^\d{10,15}$/.test(phone);
 
-const isValidRole = (value: unknown): value is Role => value === 'customer' || value === 'shopkeeper';
+const isValidRole = (value: unknown): value is Role => value === 'customer' || value === 'shopkeeper' || value === 'delivery';
 
 const isStrongPassword = (password: string) => password.length >= 6;
 
@@ -115,7 +115,7 @@ const verifyPassword = async (password: string, stored: string) => {
 
 const sendEmail = async (env: Env, to: string, subject: string, html: string) => {
   if (!env.RESEND_API_KEY) {
-    console.warn('[auth-worker] RESEND_API_KEY is missing. Skipping email send in local/dev mode.', { to, subject });
+    console.warn('[auth-worker] RESEND_API_KEY is missing. Skipping email send in local/dev mode.', { to, subject, html });
     return;
   }
 
@@ -412,8 +412,8 @@ const handleLogin = async (request: Request, env: Env) => {
     return badRequest('email/phone and password are required');
   }
 
-  if (!['customer', 'shopkeeper'].includes(selectedRole)) {
-    return badRequest('role must be either customer or shopkeeper');
+  if (!['customer', 'shopkeeper', 'delivery'].includes(selectedRole)) {
+    return badRequest('role must be either customer, shopkeeper, or delivery');
   }
 
   const email = normalizeEmail(identifier);
@@ -547,9 +547,9 @@ const handleCreateProduct = async (request: Request, env: Env) => {
     const category = String(formData.get('category') ?? '').trim();
     const price = Number(formData.get('price') ?? 0);
     const stock = Number(formData.get('stock') ?? 0);
-    const file = formData.get('image');
+    const file = formData.get('image') as any;
 
-    if (!(file instanceof File)) {
+    if (!file || typeof file === 'string') {
       return badRequest('image file is required');
     }
 

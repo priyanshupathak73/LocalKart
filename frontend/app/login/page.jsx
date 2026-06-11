@@ -2,46 +2,58 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { useTheme } from 'next-themes';
-import { FiMail, FiLock, FiEye, FiEyeOff, FiShield } from 'react-icons/fi';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiMapPin, FiArrowRight, FiCheck } from 'react-icons/fi';
 import AUTH_API_BASE_URL from '@/utils/authApi';
 
-const redirectByRole = (role) => (role === 'shopkeeper' ? '/dashboard' : '/');
+const redirectByRole = (role) => {
+  if (role === 'shopkeeper') return '/dashboard';
+  if (role === 'delivery')   return '/delivery-dashboard';
+  return '/customer-dashboard';
+};
+
+/** Reusable input row */
+function InputField({ icon: Icon, label, id, error, children }) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-xs font-extrabold text-gray-500 uppercase tracking-wider">
+        {label}
+      </label>
+      <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all bg-gray-50 ${
+        error ? 'border-red-300 focus-within:border-red-400' : 'border-gray-200 focus-within:border-green-500 focus-within:bg-white focus-within:shadow-sm focus-within:shadow-green-500/10'
+      }`}>
+        {Icon && <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />}
+        {children}
+      </div>
+      {error && <p className="text-[11px] font-bold text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+const inputCls = 'flex-1 bg-transparent outline-none text-sm font-medium text-gray-900 placeholder-gray-400';
 
 export default function LoginPage() {
-  const { theme } = useTheme();
-  const [selectedRole, setSelectedRole] = useState('customer');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState(''); // 'error' or 'success'
-  const [formData, setFormData] = useState({
-    identifier: '',
-    password: '',
-  });
+  const [selectedRole,  setSelectedRole]  = useState('customer');
+  const [showPassword,  setShowPassword]  = useState(false);
+  const [loading,       setLoading]       = useState(false);
+  const [message,       setMessage]       = useState('');
+  const [messageType,   setMessageType]   = useState(''); // 'error' | 'success'
+  const [formData,      setFormData]      = useState({ identifier: '', password: '' });
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setMessage('');
   };
 
-  const handleLogin = async (e) => {
+  const handleLogin = async e => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
-    setMessageType('');
 
-    const identifier = formData.identifier.trim();
-    const password = formData.password.trim();
+    const { identifier, password } = formData;
 
-    if (!identifier || !password) {
-      setMessage('Please enter your email or phone number and password');
+    if (!identifier.trim() || !password.trim()) {
+      setMessage('Please fill in all fields.');
       setMessageType('error');
       setLoading(false);
       return;
@@ -49,287 +61,225 @@ export default function LoginPage() {
 
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier);
     const isPhone = /^[0-9]{10,15}$/.test(identifier.replace(/\D/g, ''));
-
     if (!isEmail && !isPhone) {
-      setMessage('Please enter a valid email or phone number');
+      setMessage('Enter a valid email or phone number.');
       setMessageType('error');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${AUTH_API_BASE_URL}/login`, {
+      const res  = await fetch(`${AUTH_API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: identifier,
-          password,
-          role: selectedRole,
-        }),
+        body: JSON.stringify({ email: identifier, password, role: selectedRole }),
       });
+      const data = await res.json();
 
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        setMessage(data.message || 'Login failed');
+      if (!res.ok || !data.success) {
+        setMessage(data.message || 'Login failed. Please check your credentials.');
         setMessageType('error');
         return;
       }
 
       const role = data.role || data.user?.role;
-      const user = data.user || {
-        id: data.user?.id,
-        name: data.user?.name,
-        email: data.user?.email,
-        role,
-      };
-
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem('user', JSON.stringify(data.user));
 
-      setMessage(`✓ Login successful as ${role === 'shopkeeper' ? 'Seller' : 'Customer'}`);
+      setMessage(`Signed in successfully! Redirecting…`);
       setMessageType('success');
-
-      window.location.href = redirectByRole(role);
-    } catch (error) {
+      setTimeout(() => { window.location.href = redirectByRole(role); }, 800);
+    } catch {
       setMessage('Connection error. Please try again.');
       setMessageType('error');
-      console.error('Login error', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.6, ease: 'easeOut' },
-    },
-  };
+  // ── Left panel perks ──────────────────────────────────────────────────────
+  const perks = [
+    { emoji: '⚡', text: 'Same-hour delivery from local shops' },
+    { emoji: '🏪', text: '50+ shops in Ara, Bihar' },
+    { emoji: '🚀', text: 'Free delivery for limited time' },
+    { emoji: '💳', text: 'Cash on delivery & UPI accepted' },
+  ];
 
   return (
-    <>
-      <Navbar />
-      <main
-        className={`min-h-screen pt-32 pb-20 transition-colors ${
-          theme === 'dark'
-            ? 'bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950'
-            : 'bg-gradient-to-br from-white via-purple-50 to-blue-50'
-        }`}
-      >
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.1, 1] }}
-            transition={{ duration: 8, repeat: Infinity }}
-            className="absolute top-20 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl"
-          />
-          <motion.div
-            animate={{ opacity: [0.3, 0.5, 0.3], scale: [1, 1.1, 1] }}
-            transition={{ duration: 8, repeat: Infinity, delay: 2 }}
-            className="absolute -bottom-8 left-20 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl"
-          />
+    <div className="min-h-screen flex">
+      {/* ── LEFT PANEL ───────────────────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[42%] flex-col bg-gradient-to-br from-[#0f4c2a] via-[#166534] to-[#14532d] relative overflow-hidden">
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-green-400/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-300/10 rounded-full blur-3xl" />
+        {/* Floating emojis */}
+        {['🛒','🥦','🍞','🥛','💊','🧅'].map((e, i) => (
+          <span key={i} className="absolute text-2xl opacity-10 animate-bounce select-none"
+            style={{ left:`${8+i*15}%`, top:`${20+(i%3)*20}%`, animationDelay:`${i*0.5}s`, animationDuration:`${2.5+i*0.3}s` }}>
+            {e}
+          </span>
+        ))}
+
+        <div className="relative flex flex-col h-full px-10 py-12">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2 mb-auto">
+            <span className="text-3xl">🏪</span>
+            <span className="text-2xl font-black text-white tracking-tight">
+              Local<span className="text-green-300">Kart</span>
+            </span>
+          </Link>
+
+          {/* Main copy */}
+          <div className="my-auto">
+            <div className="inline-flex items-center gap-2 bg-white/15 rounded-full px-4 py-1.5 text-xs font-extrabold text-green-200 mb-6">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+              Serving Ara, Bihar
+            </div>
+            <h1 className="text-4xl font-black text-white leading-tight mb-3">
+              Order Local,<br />
+              <span className="text-green-300">Delivered Fast ⚡</span>
+            </h1>
+            <p className="text-green-100/80 text-base font-medium mb-8">
+              Sign in to access your orders, track deliveries, and discover shops near you.
+            </p>
+
+            {/* Perks */}
+            <div className="space-y-3">
+              {perks.map((p, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <span className="text-xl">{p.emoji}</span>
+                  <span className="text-green-100/90 text-sm font-medium">{p.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom stats */}
+          <div className="flex gap-8 mt-auto pt-8 border-t border-white/10">
+            {[['5,000+','Happy Customers'],['50+','Local Shops'],['60 min','Avg Delivery']].map(([val, lab]) => (
+              <div key={lab}>
+                <p className="text-xl font-black text-white">{val}</p>
+                <p className="text-green-300 text-xs font-bold">{lab}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── RIGHT PANEL (Form) ───────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-gray-50 min-h-screen">
+        {/* Mobile logo */}
+        <div className="lg:hidden mb-8 text-center">
+          <Link href="/" className="inline-flex items-center gap-2">
+            <span className="text-3xl">🏪</span>
+            <span className="text-2xl font-black tracking-tight">Local<span className="text-green-600">Kart</span></span>
+          </Link>
         </div>
 
-        <div className="max-w-md mx-auto px-4 relative z-10">
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className={`p-8 rounded-2xl backdrop-blur-md ${
-              theme === 'dark'
-                ? 'bg-gray-900/50 border border-purple-500/30'
-                : 'bg-white/80 border border-purple-200'
-            }`}
-          >
-            <div className="text-center mb-8">
-              <h1
-                className={`text-3xl font-bold mb-2 ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}
-              >
-                Login to LocalKart
-              </h1>
-              <p
-                className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}
-              >
-                Choose your role to get started
-              </p>
-            </div>
+        <div className="w-full max-w-sm">
+          {/* Header */}
+          <div className="mb-7">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Welcome back! 👋</h2>
+            <p className="text-gray-400 text-sm font-medium mt-1">Sign in to your LocalKart account</p>
+          </div>
 
-            {/* Role Toggle */}
-            <div className="mb-8 flex gap-3">
-              <motion.button
+          {/* Role toggle */}
+          <div className="flex gap-2 mb-6 p-1 bg-gray-100 rounded-2xl">
+            {[
+              { val: 'customer',   label: '🛒 Customer'   },
+              { val: 'shopkeeper', label: '🏪 Shopkeeper' },
+              { val: 'delivery',   label: '🚚 Delivery'   },
+            ].map(r => (
+              <button
+                key={r.val}
                 type="button"
-                onClick={() => setSelectedRole('customer')}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`flex-1 py-3 rounded-lg font-semibold transition-all ${
-                  selectedRole === 'customer'
-                    ? theme === 'dark'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
-                      : 'bg-purple-500 text-white shadow-lg shadow-purple-400/50'
-                    : theme === 'dark'
-                    ? 'bg-gray-800 text-gray-400 border border-gray-700'
-                    : 'bg-gray-100 text-gray-600 border border-gray-300'
+                onClick={() => { setSelectedRole(r.val); setMessage(''); }}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-extrabold transition-all ${
+                  selectedRole === r.val
+                    ? 'bg-[#166534] text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Customer
-              </motion.button>
-              <motion.button
-                type="button"
-                onClick={() => setSelectedRole('shopkeeper')}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`flex-1 py-3 rounded-lg font-semibold transition-all ${
-                  selectedRole === 'shopkeeper'
-                    ? theme === 'dark'
-                      ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/50'
-                      : 'bg-purple-500 text-white shadow-lg shadow-purple-400/50'
-                    : theme === 'dark'
-                    ? 'bg-gray-800 text-gray-400 border border-gray-700'
-                    : 'bg-gray-100 text-gray-600 border border-gray-300'
-                }`}
-              >
-                Shopkeeper
-              </motion.button>
-            </div>
+                {r.label}
+              </button>
+            ))}
+          </div>
 
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}
-                >
-                  Email or Phone Number
-                </label>
-                <div
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                    theme === 'dark'
-                      ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                      : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                  }`}
-                >
-                  <FiMail
-                    className={`w-5 h-5 ${
-                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                    }`}
-                  />
-                  <input
-                    type="text"
-                    name="identifier"
-                    value={formData.identifier}
-                    onChange={handleChange}
-                    placeholder="Enter email or phone number"
-                    className={`flex-1 bg-transparent outline-none ${
-                      theme === 'dark'
-                        ? 'text-white placeholder-gray-600'
-                        : 'text-gray-900 placeholder-gray-500'
-                    }`}
-                  />
-                </div>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <InputField icon={FiMail} label="Email or Phone" id="lk-id">
+              <input
+                id="lk-id"
+                type="text"
+                name="identifier"
+                value={formData.identifier}
+                onChange={handleChange}
+                placeholder="Enter email or phone"
+                className={inputCls}
+                autoComplete="username"
+              />
+            </InputField>
+
+            <InputField icon={FiLock} label="Password" id="lk-pw">
+              <input
+                id="lk-pw"
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className={inputCls}
+                autoComplete="current-password"
+              />
+              <button type="button" onClick={() => setShowPassword(v => !v)}
+                className="text-gray-400 hover:text-gray-600 transition flex-shrink-0">
+                {showPassword ? <FiEyeOff size={15} /> : <FiEye size={15} />}
+              </button>
+            </InputField>
+
+            {/* Message */}
+            {message && (
+              <div className={`flex items-center gap-2 px-4 py-3 rounded-2xl text-sm font-bold ${
+                messageType === 'success'
+                  ? 'bg-green-50 border border-green-200 text-green-700'
+                  : 'bg-red-50 border border-red-200 text-red-600'
+              }`}>
+                {messageType === 'success' ? <FiCheck size={14} /> : '⚠'}
+                {message}
               </div>
+            )}
 
-              <div>
-                <label
-                  className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                  }`}
-                >
-                  Password
-                </label>
-                <div
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg border-2 transition-all ${
-                    theme === 'dark'
-                      ? 'bg-gray-800/50 border-gray-700 focus-within:border-purple-500'
-                      : 'bg-gray-50 border-gray-200 focus-within:border-purple-400'
-                  }`}
-                >
-                  <FiLock
-                    className={`w-5 h-5 ${
-                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                    }`}
-                  />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="Enter your password"
-                    className={`flex-1 bg-transparent outline-none ${
-                      theme === 'dark'
-                        ? 'text-white placeholder-gray-600'
-                        : 'text-gray-900 placeholder-gray-500'
-                    }`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className={`p-1 transition-colors ${
-                      theme === 'dark'
-                        ? 'hover:text-purple-400'
-                        : 'hover:text-purple-600'
-                    }`}
-                  >
-                    {showPassword ? (
-                      <FiEyeOff className="w-5 h-5" />
-                    ) : (
-                      <FiEye className="w-5 h-5" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {message && (
-                <motion.div
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`p-3 rounded-lg text-sm ${
-                    messageType === 'success'
-                      ? theme === 'dark'
-                        ? 'bg-green-900/30 text-green-300 border border-green-700/50'
-                        : 'bg-green-50 text-green-700 border border-green-200'
-                      : theme === 'dark'
-                      ? 'bg-red-900/30 text-red-300 border border-red-700/50'
-                      : 'bg-red-50 text-red-700 border border-red-200'
-                  }`}
-                >
-                  {message}
-                </motion.div>
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-2xl font-extrabold text-sm bg-[#166534] hover:bg-green-800 text-white shadow-lg shadow-green-800/20 transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Signing in…</>
+              ) : (
+                <>Sign in as {selectedRole === 'shopkeeper' ? 'Shopkeeper' : selectedRole === 'delivery' ? 'Delivery Agent' : 'Customer'} <FiArrowRight size={15} /></>
               )}
+            </button>
+          </form>
 
-              <motion.button
-                type="submit"
-                disabled={loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`w-full py-3 rounded-lg font-semibold transition-all ${
-                  loading
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:shadow-lg hover:shadow-purple-500/50'
-                } bg-gradient-to-r from-purple-500 to-blue-500 text-white`}
-              >
-                {loading 
-                  ? 'Signing in...' 
-                  : `Sign in as ${selectedRole === 'shopkeeper' ? 'Shopkeeper' : 'Customer'}`
-                }
-              </motion.button>
+          {/* Footer */}
+          <p className="text-center text-sm text-gray-400 font-medium mt-6">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="text-green-700 font-extrabold hover:text-green-800 transition">
+              Create one free →
+            </Link>
+          </p>
 
-              <p className={`text-center text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
-                Don&apos;t have an account?{' '}
-                <Link href="/signup" className="text-purple-500 hover:text-purple-600 font-bold">
-                  Create one
-                </Link>
-              </p>
-            </form>
-          </motion.div>
+          {/* Trust chips */}
+          <div className="flex flex-wrap justify-center gap-3 mt-8">
+            {['🔒 Secure Login', '📍 Ara, Bihar', '⚡ Instant Access'].map(chip => (
+              <span key={chip} className="text-[11px] font-extrabold text-gray-400 bg-white border border-gray-100 px-3 py-1 rounded-full shadow-sm">
+                {chip}
+              </span>
+            ))}
+          </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </div>
   );
 }

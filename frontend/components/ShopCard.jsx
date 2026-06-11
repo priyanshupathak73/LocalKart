@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTheme } from 'next-themes';
-import { FiMapPin, FiStar, FiArrowRight } from 'react-icons/fi';
+import { FiMapPin, FiStar, FiArrowRight, FiHeart } from 'react-icons/fi';
 
 // ── Fallback images per category (guaranteed working URLs) ──
 const CATEGORY_FALLBACKS = {
@@ -21,6 +21,39 @@ export default function ShopCard({ business, index = 0 }) {
   const { theme } = useTheme();
   const [imageError, setImageError] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+
+      if (parsedUser.role === 'customer') {
+        const saved = JSON.parse(localStorage.getItem('savedShops') || '[]');
+        setIsSaved(saved.includes(business.id));
+      }
+    }
+  }, [business.id]);
+
+  const toggleSave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user || user.role !== 'customer') return;
+
+    const saved = JSON.parse(localStorage.getItem('savedShops') || '[]');
+    let updated;
+    if (isSaved) {
+      updated = saved.filter(id => id !== business.id);
+      setIsSaved(false);
+    } else {
+      updated = [...saved, business.id];
+      setIsSaved(true);
+    }
+    localStorage.setItem('savedShops', JSON.stringify(updated));
+  };
 
   // ── Loading skeleton ──────────────────────────────────────
   if (!business) {
@@ -138,6 +171,21 @@ export default function ShopCard({ business, index = 0 }) {
               <FiStar className="w-3.5 h-3.5 fill-yellow-600 text-yellow-700" />
               <span className="text-xs font-bold text-yellow-900">{business.rating || 'New'}</span>
             </div>
+
+            {/* Save (Favorite) Button */}
+            {user && user.role === 'customer' && (
+              <button
+                onClick={toggleSave}
+                className={`absolute top-3 right-16 p-1.5 rounded-full backdrop-blur-sm shadow-sm transition-all duration-300 ${
+                  isSaved
+                    ? 'bg-red-500 text-white hover:bg-red-600 scale-110'
+                    : 'bg-white/80 dark:bg-gray-900/80 text-gray-600 dark:text-gray-400 hover:text-red-500 hover:bg-white hover:scale-110'
+                }`}
+                title={isSaved ? "Remove from Saved" : "Save Shop"}
+              >
+                <FiHeart className={`w-4 h-4 ${isSaved ? 'fill-white' : ''}`} />
+              </button>
+            )}
           </div>
 
           {/* ── Content ─────────────────────────────────────── */}

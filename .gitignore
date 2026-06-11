@@ -1,10 +1,36 @@
-.next
-node_modules
-*.log
+# Next.js & bundlers
+.next/
+dist/
+build/
+.vercel
+
+# Node.js
+node_modules/
+**/node_modules/
+package-lock.json
+**/package-lock.json
+
+# Cloudflare Wrangler
+.wrangler/
+**/ .wrangler/
+.dev.vars
+
+# Local environment configs
+.env
 .env.local
 .env.*.local
-.vercel
-dist
-build
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
 .DS_Store
-.env
+Thumbs.db
+
+# Databases & local sqlite
+*.sqlite
+*.sqlite3
+*.db

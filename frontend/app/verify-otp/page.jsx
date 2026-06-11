@@ -9,7 +9,11 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import AUTH_API_BASE_URL from '@/utils/authApi';
 
-const redirectByRole = (role) => (role === 'shopkeeper' ? '/dashboard' : '/');
+const redirectByRole = (role) => {
+  if (role === 'shopkeeper') return '/dashboard';
+  if (role === 'delivery') return '/delivery-dashboard';
+  return '/customer-dashboard';
+};
 
 export default function VerifyOtpPage() {
   const { theme } = useTheme();

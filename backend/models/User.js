@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['customer', 'shopkeeper', 'admin', 'user'],
+    enum: ['customer', 'shopkeeper', 'admin', 'user', 'delivery'],
     default: 'customer'
   },
   shopName: {
@@ -51,8 +51,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true,
     required: function() {
-      return this.role === 'shopkeeper';
+      return this.role === 'shopkeeper' || this.role === 'delivery';
     }
+  },
+  vehicleDetails: {
+    type: String,
+    trim: true
+  },
+  lastKnownLocation: {
+    lat: { type: Number },
+    lng: { type: Number }
+  },
+  isOnline: {
+    type: Boolean,
+    default: true
   },
   createdAt: {
     type: Date,

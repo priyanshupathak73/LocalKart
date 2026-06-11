@@ -5,6 +5,8 @@ const cors      = require('cors');
 const connectDB = require('./config/db');
 const businessRoutes = require('./routes/businessRoutes');
 const authRoutes = require('./routes/authRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const agentRoutes = require('./routes/agentRoutes');
 
 // ── Connect to MongoDB ──────────────────────────────────────
 connectDB();
@@ -34,6 +36,8 @@ app.get('/', (req, res) => {
 
 app.use('/api/businesses', businessRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', paymentRoutes);
+app.use('/api/agent', agentRoutes);
 
 // ── Global Error Handler ─────────────────────────────────────
 app.use((err, req, res, next) => {

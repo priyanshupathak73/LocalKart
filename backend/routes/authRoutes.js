@@ -18,13 +18,24 @@ router.post('/register', async (req, res) => {
       phoneNumber,
     } = req.body;
 
-    const normalizedRole = role === 'shopkeeper' ? 'shopkeeper' : 'customer';
+    let normalizedRole = 'customer';
+    if (role === 'shopkeeper') normalizedRole = 'shopkeeper';
+    if (role === 'delivery')   normalizedRole = 'delivery';
 
     if (normalizedRole === 'shopkeeper') {
       if (!shopName || !shopCategory || !address || !phoneNumber) {
         return res.status(400).json({
           success: false,
           message: 'Shopkeeper signup requires shop name, category, address and phone number',
+        });
+      }
+    }
+
+    if (normalizedRole === 'delivery') {
+      if (!phoneNumber) {
+        return res.status(400).json({
+          success: false,
+          message: 'Delivery agent signup requires phone number',
         });
       }
     }
@@ -44,7 +55,8 @@ router.post('/register', async (req, res) => {
       shopName: normalizedRole === 'shopkeeper' ? shopName : undefined,
       shopCategory: normalizedRole === 'shopkeeper' ? shopCategory : undefined,
       address: normalizedRole === 'shopkeeper' ? address : undefined,
-      phoneNumber: normalizedRole === 'shopkeeper' ? phoneNumber : undefined,
+      phoneNumber: ['shopkeeper', 'delivery'].includes(normalizedRole) ? phoneNumber : undefined,
+      vehicleDetails: normalizedRole === 'delivery' ? req.body.vehicleDetails : undefined,
     });
 
     // Create token
@@ -64,6 +76,7 @@ router.post('/register', async (req, res) => {
         shopCategory: user.shopCategory,
         address: user.address,
         phoneNumber: user.phoneNumber,
+        vehicleDetails: user.vehicleDetails,
       },
     });
   } catch (error) {
@@ -108,6 +121,7 @@ router.post('/login', async (req, res) => {
         shopCategory: user.shopCategory,
         address: user.address,
         phoneNumber: user.phoneNumber,
+        vehicleDetails: user.vehicleDetails,
       },
     });
   } catch (error) {

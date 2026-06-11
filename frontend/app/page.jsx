@@ -1,28 +1,21 @@
-import Navbar from '@/components/Navbar';
-import DiscoveryHeroSection from '@/components/DiscoveryHeroSection';
-import DirectoryPreviewSection from '@/components/DirectoryPreviewSection';
-import AboutSection from '@/components/AboutSection';
-import TestimonialsSection from '@/components/TestimonialsSection';
-import LocationSection from '@/components/LocationSection';
-import ContactForm from '@/components/ContactForm';
-import Footer from '@/components/Footer';
-import WhatsAppButton from '@/components/WhatsAppButton';
+import LocalKartHome from '@/components/LocalKartHome';
 import { Providers } from './providers';
+
+export const metadata = {
+  title: 'LocalKart – Same-Hour Delivery from Local Shops in Ara, Bihar',
+  description: 'Order groceries, bakery, medicines and more from shops near you in Ara, Bihar. Free delivery, same-hour delivery, support local businesses.',
+  keywords: 'local delivery, grocery delivery, Ara Bihar, hyperlocal marketplace, same-hour delivery, LocalKart',
+  openGraph: {
+    title: 'LocalKart – Same-Hour Delivery in Ara, Bihar',
+    description: 'Get groceries, bakery & more delivered in under an hour from local shops near you.',
+    type: 'website',
+  },
+};
 
 export default function Home() {
   return (
     <Providers>
-      <main className="min-h-screen bg-white dark:bg-dark-bg text-gray-900 dark:text-white overflow-x-hidden">
-        <Navbar />
-        <DiscoveryHeroSection />
-        <DirectoryPreviewSection />
-        <AboutSection />
-        <TestimonialsSection />
-        <LocationSection />
-        <ContactForm />
-        <Footer />
-        <WhatsAppButton />
-      </main>
+      <LocalKartHome />
     </Providers>
   );
 }
