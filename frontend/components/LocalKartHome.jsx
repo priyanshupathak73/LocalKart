@@ -262,42 +262,29 @@ export default function LocalKartHome() {
             {/* Right Side Actions: Profile and Cart */}
             <div className="flex items-center gap-3 shrink-0">
               
-              {/* Account Dropdown or Buttons */}
-              {user ? (
-                <div className="flex items-center gap-2 bg-white/70 border border-gray-200/50 pl-2 pr-1.5 py-1.5 rounded-2xl shadow-sm">
-                  {/* Circular Avatar */}
-                  <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-purple-500 via-indigo-500 to-green-400 text-white font-black text-xs flex items-center justify-center shadow-sm uppercase select-none">
-                    {user.name ? user.name[0] : 'U'}
-                  </div>
-                  <div className="flex flex-col hidden xl:block select-none leading-none mr-2">
-                    <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Welcome</span>
-                    <span className="text-xs font-black text-gray-800 mt-0.5">{user.name.split(' ')[0]}</span>
-                  </div>
-                  
-                  {/* Dashboard link button with mint background */}
-                  <Link href={user.role === 'delivery' ? '/delivery-dashboard' : user.role === 'shopkeeper' ? '/dashboard' : '/customer-dashboard'}>
-                    <button className="px-3 py-1.5 bg-[#E8F5E9] hover:bg-[#C8E6C9] text-[#0F3A1F] text-[10px] font-black uppercase tracking-wider rounded-xl transition shadow-sm">
-                      Dashboard
-                    </button>
-                  </Link>
-                  <button onClick={handleLogout} className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl transition" title="Logout">
-                    <FiX size={14} className="stroke-[2.5]" />
+              {/* Account / Login & Sign Up Actions */}
+              <div className="flex items-center gap-2">
+                <Link href="/login">
+                  <button className="px-4 py-2 border border-gray-300 hover:border-gray-400 rounded-xl transition-all text-gray-700 text-xs font-black uppercase tracking-wider">
+                    Login
                   </button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <Link href="/login">
-                    <button className="px-4 py-2 border border-gray-300 hover:border-gray-400 rounded-xl transition-all text-gray-700 text-xs font-black uppercase tracking-wider">
-                      Login
+                </Link>
+                <Link href="/signup">
+                  <button className="px-4 py-2 bg-[#0F3A1F] hover:bg-[#165a31] text-white rounded-xl transition-all text-xs font-black uppercase tracking-wider shadow-sm shadow-green-800/10">
+                    Sign Up
+                  </button>
+                </Link>
+                {user && (
+                  <div className="flex items-center gap-2 bg-white/70 border border-gray-250/50 pl-2 pr-1.5 py-1.5 rounded-2xl shadow-sm ml-1 select-none">
+                    <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-purple-500 via-indigo-500 to-green-400 text-white font-black text-xs flex items-center justify-center shadow-sm uppercase">
+                      {user.name ? user.name[0] : 'U'}
+                    </div>
+                    <button onClick={handleLogout} className="p-1.5 bg-red-50 hover:bg-red-100 text-red-650 rounded-xl transition ml-1" title="Logout">
+                      <FiX size={14} className="stroke-[2.5]" />
                     </button>
-                  </Link>
-                  <Link href="/signup">
-                    <button className="px-4 py-2 bg-[#0F3A1F] hover:bg-[#165a31] text-white rounded-xl transition-all text-xs font-black uppercase tracking-wider shadow-sm shadow-green-800/10">
-                      Sign Up
-                    </button>
-                  </Link>
-                </div>
-              )}
+                  </div>
+                )}
+              </div>
 
               {/* Cart Button with mint bg and red counter */}
               <Link href={user ? '/customer-dashboard' : '/login'}>
