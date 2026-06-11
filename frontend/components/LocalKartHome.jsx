@@ -203,16 +203,13 @@ export default function LocalKartHome() {
             
             {/* Logo, Divider and Location Selector */}
             <div className="flex items-center shrink-0">
-              <Link href="/" className="flex flex-col select-none leading-none mr-2">
-                <div className="flex items-center gap-1">
-                  <span className="text-2xl">🏪</span>
-                  <span className="text-xl font-black tracking-tight text-gray-900">
-                    Local<span className="text-green-700">Kart</span>
-                  </span>
-                </div>
-                <span className="text-[9px] font-bold text-gray-400 tracking-wide mt-0.5">
-                  Hyperlocal Grocery & Essentials
-                </span>
+              <Link href="/" className="flex items-center select-none mr-2">
+                <img 
+                  src="/logo.png" 
+                  alt="e-LocalKart Logo" 
+                  className="h-14 w-auto object-contain"
+                  style={{ mixBlendMode: 'multiply' }}
+                />
               </Link>
 
               {/* Divider */}
@@ -353,23 +350,23 @@ export default function LocalKartHome() {
         <section className="bg-white border border-gray-150/70 rounded-3xl overflow-hidden shadow-sm flex flex-col md:flex-row items-center relative min-h-[400px] mb-12">
           
           <div className="p-6 sm:p-10 md:p-12 md:w-1/2 space-y-4 z-10">
-            <span className="inline-flex items-center gap-1.5 bg-[#E8F5E9] border border-green-150 rounded-full px-3.5 py-1 text-[10px] font-black text-[#0F3A1F] uppercase tracking-wider shadow-sm animate-pulse">
+            <span className="inline-flex items-center gap-1.5 bg-orange-50 border border-orange-200 rounded-full px-3.5 py-1 text-[10px] font-black text-orange-700 uppercase tracking-wider shadow-sm animate-pulse">
               🍃 Purely Hyperlocal & Fresh
             </span>
 
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F3A1F] leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">
               Fresh Groceries <br className="hidden lg:block" />
               Delivered to <br />
               Your Doorstep
             </h1>
 
-            <p className="text-xs sm:text-sm font-semibold text-gray-500 max-w-sm leading-relaxed">
+            <p className="text-xs sm:text-sm font-semibold text-gray-550 max-w-sm leading-relaxed">
               Buy your daily needs from Ara's top local stores. Farm-fresh vegetables, dairy, bakery, meat, and essentials shipped directly in under 40 minutes.
             </p>
 
             <div className="pt-2 flex flex-wrap gap-3">
               <Link href="/customer-dashboard">
-                <button className="px-6 py-3.5 bg-[#0F3A1F] hover:bg-[#165a31] text-white font-black text-xs rounded-xl shadow-lg shadow-green-950/20 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 uppercase tracking-wider">
+                <button className="px-6 py-3.5 bg-[#F97316] hover:bg-[#EA580C] text-white font-black text-xs rounded-xl shadow-lg shadow-orange-500/20 hover:shadow-xl hover:-translate-y-0.5 transition-all flex items-center gap-2 uppercase tracking-wider">
                   <span>Shop Now</span>
                   <FiArrowRight className="stroke-[2.5]" />
                 </button>

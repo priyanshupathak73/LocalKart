@@ -416,11 +416,12 @@ export default function SignupPage() {
 
         <div className="relative flex flex-col h-full px-10 py-12">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 mb-auto leading-none">
-            <span className="text-3xl">🏪</span>
-            <span className="text-2xl font-black text-white tracking-tight">
-              Local<span className="text-green-400">Kart</span>
-            </span>
+          <Link href="/" className="inline-flex items-center bg-white rounded-2xl p-2 mb-auto shadow-md self-start">
+            <img 
+              src="/logo.png" 
+              alt="e-LocalKart Logo" 
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           <div className="my-auto">
@@ -491,9 +492,13 @@ export default function SignupPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-10 py-10 bg-gray-50 overflow-y-auto">
         {/* Mobile logo */}
         <div className="lg:hidden mb-6 text-center select-none">
-          <Link href="/" className="inline-flex items-center gap-2 leading-none">
-            <span className="text-3xl">🏪</span>
-            <span className="text-2xl font-black tracking-tight">Local<span className="text-green-700">Kart</span></span>
+          <Link href="/" className="inline-flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="e-LocalKart Logo" 
+              className="h-12 w-auto object-contain"
+              style={{ mixBlendMode: 'multiply' }}
+            />
           </Link>
         </div>
 

@@ -59,15 +59,14 @@ export default function Navbar() {
           <Link href="/">
             <motion.div
               whileHover={{ scale: 1.05 }}
-              className="flex items-center space-x-2 cursor-pointer"
+              className="flex items-center cursor-pointer"
             >
-              <span className="text-3xl">🏪</span>
-              <div>
-                <h1 className="text-2xl font-bold gradient-text">LocalKart</h1>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  Local Marketplace
-                </p>
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="e-LocalKart Logo" 
+                className="h-12 w-auto object-contain"
+                style={{ mixBlendMode: 'multiply' }}
+              />
             </motion.div>
           </Link>
 

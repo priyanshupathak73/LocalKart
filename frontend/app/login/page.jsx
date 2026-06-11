@@ -122,11 +122,12 @@ export default function LoginPage() {
 
         <div className="relative flex flex-col h-full px-10 py-12">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 mb-auto">
-            <span className="text-3xl">🏪</span>
-            <span className="text-2xl font-black text-white tracking-tight">
-              Local<span className="text-green-300">Kart</span>
-            </span>
+          <Link href="/" className="inline-flex items-center bg-white rounded-2xl p-2 mb-auto shadow-md self-start">
+            <img 
+              src="/logo.png" 
+              alt="e-LocalKart Logo" 
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* Main copy */}
@@ -169,10 +170,14 @@ export default function LoginPage() {
       {/* ── RIGHT PANEL (Form) ───────────────────────────────────────────── */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-gray-50 min-h-screen">
         {/* Mobile logo */}
-        <div className="lg:hidden mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-3xl">🏪</span>
-            <span className="text-2xl font-black tracking-tight">Local<span className="text-green-600">Kart</span></span>
+        <div className="lg:hidden mb-8 text-center select-none">
+          <Link href="/" className="inline-flex items-center">
+            <img 
+              src="/logo.png" 
+              alt="e-LocalKart Logo" 
+              className="h-12 w-auto object-contain"
+              style={{ mixBlendMode: 'multiply' }}
+            />
           </Link>
         </div>
 
